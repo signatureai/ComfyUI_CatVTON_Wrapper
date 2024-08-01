@@ -9,10 +9,10 @@ class LS_CatVTON:
 
     @classmethod
     def INPUT_TYPES(cls):
-        checkpoints = ["None"] + folder_paths.get_filename_list("checkpoints")
+        # checkpoints = ["None"] + folder_paths.get_filename_list("checkpoints")
         return {
             "required": {
-                "inpaint_checkpoint": (checkpoints,),
+                # "inpaint_checkpoint": (checkpoints,),
                 "image": ("IMAGE",),
                 "mask": ("MASK",),
                 "refer_image": ("IMAGE",),
@@ -32,10 +32,11 @@ class LS_CatVTON:
     FUNCTION = "catvton"
     CATEGORY = '😺dzNodes/CatVTON Wrapper'
 
-    def catvton(self, inpaint_checkpoint, image, mask, refer_image, width, height, mask_blur, mask_grow, mixed_precision, seed, steps, cfg):
+    def catvton(self, image, mask, refer_image, width, height, mask_blur, mask_grow, mixed_precision, seed, steps, cfg):
 
+        # sd15_inpaint_path = inpaint_checkpoint
         catvton_path = os.path.join(folder_paths.models_dir, "CatVTON")
-
+        sd15_inpaint_path = os.path.join(catvton_path, "stable-diffusion-inpainting")
 
         mixed_precision = {
             "fp32": torch.float32,
@@ -44,7 +45,7 @@ class LS_CatVTON:
         }[mixed_precision]
 
         pipeline = CatVTONPipeline(
-            base_ckpt=inpaint_checkpoint,
+            base_ckpt=sd15_inpaint_path,
             attn_ckpt=catvton_path,
             attn_ckpt_version="mix",
             weight_dtype=mixed_precision,
