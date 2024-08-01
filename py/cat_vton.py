@@ -16,8 +16,8 @@ class LS_CatVTON:
                 "image": ("IMAGE",),
                 "mask": ("MASK",),
                 "refer_image": ("IMAGE",),
-                # "width": ("INT", {"default": 768}),
-                # "height": ("INT", {"default": 1024}),
+                "width": ("INT", {"default": 768}),
+                "height": ("INT", {"default": 1024}),
                 "mask_blur": ("INT", {"default": 9}),
                 "mask_grow": ("INT", {"default": 25, "min": -999, "max": 999, "step": 1}),
                 "mixed_precision": (["fp32", "fp16", "bf16"], {"default": "fp16"}),
@@ -32,7 +32,7 @@ class LS_CatVTON:
     FUNCTION = "catvton"
     CATEGORY = '😺dzNodes/CatVTON Wrapper'
 
-    def catvton(self, image, mask, refer_image, mask_blur, mask_grow, mixed_precision, seed, steps, cfg):
+    def catvton(self, image, mask, refer_image, width, height, mask_blur, mask_grow, mixed_precision, seed, steps, cfg):
 
         # sd15_inpaint_path = inpaint_checkpoint
         catvton_path = os.path.join(folder_paths.models_dir, "CatVTON")
@@ -50,7 +50,7 @@ class LS_CatVTON:
             attn_ckpt_version="mix",
             weight_dtype=mixed_precision,
             use_tf32=True,
-            device='cuda'
+            device='cuda',
         )
 
         if mask.dim() == 2:
@@ -67,12 +67,11 @@ class LS_CatVTON:
         mask_image = to_pil_image(mask_image)
 
         generator = torch.Generator(device='cuda').manual_seed(seed)
-        # person_image, person_image_bbox = resize_and_padding_image(target_image, (width, height))
-        # cloth_image, _ = resize_and_padding_image(refer_image, (width, height))
-        # mask, _ = resize_and_padding_image(mask_image, (width, height))
-        person_image = target_image
-        cloth_image = refer_image
-        mask = mask_image
+        person_image, person_image_bbox = resize_and_padding_image(target_image, (width, height))
+        cloth_image, _ = resize_and_padding_image(refer_image, (width, height))
+        mask, _ = resize_and_padding_image(mask_image, (width, height))
+
+
         mask_processor = VaeImageProcessor(vae_scale_factor=8, do_normalize=False, do_binarize=True,
                                            do_convert_grayscale=True)
         mask = mask_processor.blur(mask, blur_factor=mask_blur)
@@ -84,10 +83,12 @@ class LS_CatVTON:
             mask=mask,
             num_inference_steps=steps,
             guidance_scale=cfg,
-            generator=generator
+            generator=generator,
+            width=width,
+            height=height
         )[0]
 
-        # result_image = restore_padding_image(result_image, target_image.size, person_image_bbox)
+        result_image = restore_padding_image(result_image, target_image.size, person_image_bbox)
         result_image = to_tensor(result_image).permute(1, 2, 0).unsqueeze(0)
         log(f"{NODE_NAME} Processed.", message_type='finish')
 
