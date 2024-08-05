@@ -95,9 +95,9 @@ class LS_CatVTON:
         return (result_image,)
 
 NODE_CLASS_MAPPINGS = {
-    "CatVTONWrapper": LS_CatVTON
+    "CatVTONWrapper_SIG": LS_CatVTON
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "CatVTONWrapper": "CatVTON Wrapper"
+    "CatVTONWrapper_SIG": "CatVTON Wrapper SIG"
 }
