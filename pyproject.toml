@@ -11,5 +11,5 @@ Repository = "https://github.com/chflame163/ComfyUI_CatVTON_Wrapper"
 
 [tool.comfy]
 PublisherId = "chflame163"
-DisplayName = "ComfyUI_CatVTON_Wrapper"
+DisplayName = "ComfyUI_CatVTON_Wrapper_SIG"
 Icon = ""
